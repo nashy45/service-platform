@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}{{ provider.user.get_full_name|default:provider.user.username }} - ServiceHub{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+
+    <!-- Provider Header -->
+    <div class="bg-white rounded-2xl shadow p-8 mb-8">
+        <div class="flex flex-col md:flex-row items-start gap-6">
+            {% if provider.user.profile_picture %}
+                <img src="{{ provider.user.profile_picture.url }}" class="w-24 h-24 rounded-full object-cover">
+            {% else %}
+                <div class="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-4xl">
+                    {{ provider.user.username|first|upper }}
+                </div>
+            {% endif %}
+            <div class="flex-1">
+                <h1 class="text-2xl font-bold mb-1">{{ provider.user.get_full_name|default:provider.user.username }}</h1>
+                <p class="text-gray-400 text-sm mb-3"><i class="fas fa-map-marker-alt mr-1"></i>{{ provider.service_area }}</p>
+                <p class="text-gray-600 mb-4">{{ provider.bio }}</p>
+                <div class="flex flex-wrap gap-6 text-sm text-gray-500">
+                    <span><i class="fas fa-star text-yellow-400 mr-1"></i>{{ provider.rating }}/5 rating</span>
+                    <span><i class="fas fa-briefcase mr-1"></i>{{ provider.total_jobs }} jobs completed</span>
+                    <span><i class="fas fa-clock mr-1"></i>{{ provider.years_experience }} years experience</span>
+                    <span><i class="fas fa-coins mr-1"></i>{{ provider.hourly_rate }} FCFA/hr</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services -->
+    <div class="bg-white rounded-2xl shadow p-8 mb-8">
+        <h2 class="text-xl font-bold mb-6">Services Offered</h2>
+        {% if services %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for service in services %}
+            <div class="border rounded-xl p-4 hover:border-blue-400 transition">
+                <h3 class="font-semibold mb-1">{{ service.title }}</h3>
+                <p class="text-gray-500 text-sm mb-3">{{ service.description|truncatechars:80 }}</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-blue-600 font-bold">{{ service.price }} FCFA <span class="text-gray-400 text-xs font-normal">/ {{ service.get_price_type_display }}</span></span>
+                    <a href="{% url 'service_detail' service.pk %}" class="text-sm bg-blue-600 text-white px-4 py-1.5 rounded-lg hover:bg-blue-700">Book</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500">No services listed yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Reviews -->
+    <div class="bg-white rounded-2xl shadow p-8">
+        <h2 class="text-xl font-bold mb-6">Customer Reviews</h2>
+        {% for review in reviews %}
+        <div class="border-b pb-4 mb-4 last:border-0">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="font-medium text-sm">{{ review.customer.get_full_name|default:review.customer.username }}</span>
+                <span class="text-yellow-400 text-sm">
+                    {% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}
+                </span>
+            </div>
+            <p class="text-gray-600 text-sm">{{ review.comment }}</p>
+            <p class="text-gray-400 text-xs mt-1">{{ review.created_at|date:"M d, Y" }}</p>
+        </div>
+        {% empty %}
+        <p class="text-gray-500 text-center py-4">No reviews yet.</p>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Admin Dashboard - ServiceHub{% endblock %}
+{% block content %}
+
+<div class="flex min-h-screen bg-gray-100">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-900 text-gray-300 flex-shrink-0 hidden md:flex flex-col">
+        <div class="px-6 py-6 border-b border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <p class="font-bold text-white text-sm">{{ user.get_full_name|default:user.username }}</p>
+                    <span class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">Administrator</span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-1 px-4 py-6 space-y-1 text-sm">
+            <p class="text-gray-500 text-xs uppercase tracking-widest px-4 mb-2">Overview</p>
+            <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-semibold">
+                <i class="fa-solid fa-gauge w-4"></i> Dashboard
+            </a>
+
+            <p class="text-gray-500 text-xs uppercase tracking-widest px-4 mt-5 mb-2">Manage</p>
+            <a href="{% url 'admin_users' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-gray-800 hover:text-white transition">
+                <i class="fa-solid fa-users w-4"></i> Users
+            </a>
+            <a href="{% url 'admin_providers' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-gray-800 hover:text-white transition">
+                <i class="fa-solid fa-user-tie w-4"></i> Providers
+            </a>
+            <a href="{% url 'admin_bookings' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-gray-800 hover:text-white transition">
+                <i class="fa-solid fa-calendar-check w-4"></i> Bookings
+            </a>
+            <a href="{% url 'category_list' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-gray-800 hover:text-white transition">
+                <i class="fa-solid fa-grid-2 w-4"></i> Services
+            </a>
+
+            <div class="pt-4 border-t border-gray-700 mt-5">
+                <a href="{% url 'logout' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-400 hover:bg-gray-800 transition">
+                    <i class="fa-solid fa-right-from-bracket w-4"></i> Logout
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">Admin Dashboard</h1>
+                <p class="text-gray-400 text-sm">Welcome back — here's what's happening on ServiceHub.</p>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-6 space-y-6">
+
+            <!-- Stat Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-users text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-800">{{ total_users }}</p>
+                        <p class="text-xs text-gray-400">Total Users</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-user-tie text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-800">{{ total_providers }}</p>
+                        <p class="text-xs text-gray-400">Providers</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-calendar-days text-yellow-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-800">{{ total_bookings }}</p>
+                        <p class="text-xs text-gray-400">Total Bookings</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-hourglass-half text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-800">{{ pending_providers }}</p>
+                        <p class="text-xs text-gray-400">Pending Approvals</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second Row Stats -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-person text-indigo-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-800">{{ total_customers }}</p>
+                        <p class="text-xs text-gray-400">Customers</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-circle-check text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-800">{{ completed_bookings }}</p>
+                        <p class="text-xs text-gray-400">Completed Jobs</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-clock text-orange-500 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-800">{{ pending_bookings }}</p>
+                        <p class="text-xs text-gray-400">Pending Bookings</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-grid-2 text-teal-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-800">{{ total_services }}</p>
+                        <p class="text-xs text-gray-400">Active Services</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Providers + Recent Bookings -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- Pending Provider Approvals -->
+                <div class="bg-white rounded-2xl shadow">
+                    <div class="flex items-center justify-between px-6 py-4 border-b">
+                        <h2 class="font-bold text-gray-800"><i class="fa-solid fa-hourglass-half mr-2 text-yellow-500"></i>Pending Approvals</h2>
+                        <a href="{% url 'admin_providers' %}" class="text-blue-600 text-sm hover:underline">View all</a>
+                    </div>
+                    {% if pending_provider_list %}
+                    <div class="divide-y">
+                        {% for provider in pending_provider_list %}
+                        <div class="px-6 py-4 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm">
+                                    {{ provider.user.first_name|first|upper|default:provider.user.email|first|upper }}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800 text-sm">{{ provider.user.get_full_name|default:provider.user.username }}</p>
+                                    <p class="text-gray-400 text-xs">{{ provider.user.email }}</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <a href="{% url 'admin_approve_provider' provider.pk 'approved' %}"
+                                   class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold hover:bg-green-200 transition">
+                                    <i class="fa-solid fa-check mr-1"></i>Approve
+                                </a>
+                                <a href="{% url 'admin_approve_provider' provider.pk 'rejected' %}"
+                                   class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-semibold hover:bg-red-200 transition">
+                                    <i class="fa-solid fa-xmark mr-1"></i>Reject
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-12">
+                        <i class="fa-solid fa-circle-check text-green-400 text-3xl mb-3"></i>
+                        <p class="text-gray-400 text-sm">No pending approvals</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Recent Bookings -->
+                <div class="bg-white rounded-2xl shadow">
+                    <div class="flex items-center justify-between px-6 py-4 border-b">
+                        <h2 class="font-bold text-gray-800"><i class="fa-solid fa-clock-rotate-left mr-2 text-blue-500"></i>Recent Bookings</h2>
+                        <a href="{% url 'admin_bookings' %}" class="text-blue-600 text-sm hover:underline">View all</a>
+                    </div>
+                    {% if recent_bookings %}
+                    <div class="divide-y">
+                        {% for booking in recent_bookings %}
+                        <div class="px-6 py-4 flex items-center justify-between">
+                            <div>
+                                <p class="font-medium text-gray-800 text-sm">{{ booking.service.title }}</p>
+                                <p class="text-gray-400 text-xs">{{ booking.customer.get_full_name|default:booking.customer.username }} &rarr; {{ booking.provider.user.get_full_name|default:booking.provider.user.username }}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="px-2 py-1 rounded-full text-xs font-semibold
+                                    {% if booking.status == 'completed' %}bg-green-100 text-green-700
+                                    {% elif booking.status == 'confirmed' %}bg-blue-100 text-blue-700
+                                    {% elif booking.status == 'in_progress' %}bg-purple-100 text-purple-700
+                                    {% elif booking.status == 'cancelled' %}bg-red-100 text-red-700
+                                    {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                                    {{ booking.get_status_display }}
+                                </span>
+                                <p class="text-gray-400 text-xs mt-1">{{ booking.total_price }} FCFA</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-12">
+                        <i class="fa-solid fa-calendar-xmark text-gray-300 text-3xl mb-3"></i>
+                        <p class="text-gray-400 text-sm">No bookings yet</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Users -->
+            <div class="bg-white rounded-2xl shadow">
+                <div class="flex items-center justify-between px-6 py-4 border-b">
+                    <h2 class="font-bold text-gray-800"><i class="fa-solid fa-user-plus mr-2 text-indigo-500"></i>Recent Registrations</h2>
+                    <a href="{% url 'admin_users' %}" class="text-blue-600 text-sm hover:underline">View all</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-400 text-xs uppercase tracking-wide">
+                                <th class="text-left px-6 py-3">User</th>
+                                <th class="text-left px-6 py-3">Email</th>
+                                <th class="text-left px-6 py-3">Role</th>
+                                <th class="text-left px-6 py-3">Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            {% for u in recent_users %}
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-bold">
+                                            {{ u.first_name|first|upper|default:u.email|first|upper }}
+                                        </div>
+                                        <span class="font-medium text-gray-800">{{ u.get_full_name|default:u.username }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-3 text-gray-500">{{ u.email }}</td>
+                                <td class="px-6 py-3">
+                                    <span class="px-2 py-1 rounded-full text-xs font-semibold
+                                        {% if u.role == 'admin' %}bg-red-100 text-red-700
+                                        {% elif u.role == 'provider' %}bg-green-100 text-green-700
+                                        {% else %}bg-blue-100 text-blue-700{% endif %}">
+                                        {{ u.get_role_display }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-3 text-gray-400">{{ u.created_at|date:"M d, Y" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+{% endblock %}

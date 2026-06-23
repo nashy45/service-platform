@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+{% block title %}ServiceHub - Book Trusted Services{% endblock %}
+{% block content %}
+
+<!-- Hero Section -->
+<section class="relative bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 text-white overflow-hidden">
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-indigo-300 rounded-full blur-3xl"></div>
+    </div>
+    <div class="relative max-w-7xl mx-auto px-6 py-24 flex flex-col md:flex-row items-center gap-12">
+        <div class="flex-1 text-center md:text-left">
+            <span class="inline-block bg-white/20 text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-4 tracking-wide uppercase">Trusted Service Platform</span>
+            <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6">
+                Find & Book <br><span class="text-yellow-300">Trusted Professionals</span><br> Near You
+            </h1>
+            <p class="text-blue-100 text-lg mb-8 max-w-xl">From drivers to daycare, house cleaning to office maintenance — get reliable help at your fingertips.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                <a href="{% url 'category_list' %}" class="bg-yellow-400 text-gray-900 font-bold px-8 py-3 rounded-full hover:bg-yellow-300 transition shadow-lg">Browse Services</a>
+                <a href="{% url 'register_provider' %}" class="bg-white/20 border border-white/40 text-white font-semibold px-8 py-3 rounded-full hover:bg-white/30 transition">Become a Provider</a>
+            </div>
+            <div class="flex gap-8 mt-10 justify-center md:justify-start text-sm text-blue-100">
+                <div>
+                    <span class="text-white font-bold text-2xl block">{{ total_providers }}</span>
+                    Provider{{ total_providers|pluralize }}
+                </div>
+                <div>
+                    <span class="text-white font-bold text-2xl block">{{ total_bookings }}</span>
+                    Booking{{ total_bookings|pluralize }}
+                </div>
+                <div>
+                    <span class="text-white font-bold text-2xl block">
+                        {% if avg_rating %}{{ avg_rating }} <i class="fa-solid fa-star text-yellow-300 text-lg"></i>{% else %}<span class="text-base font-normal text-blue-200">No ratings yet</span>{% endif %}
+                    </span>
+                    Avg Rating
+                </div>
+            </div>
+        </div>
+        <div class="flex-1 hidden md:grid grid-cols-2 gap-4 max-w-sm">
+            <div class="bg-white/15 backdrop-blur rounded-2xl p-5 text-center border border-white/20">
+                <i class="fa-solid fa-car text-4xl text-yellow-300 mb-2"></i>
+                <p class="font-semibold text-sm mt-2">Driver Booking</p>
+            </div>
+            <div class="bg-white/15 backdrop-blur rounded-2xl p-5 text-center border border-white/20 mt-6">
+                <i class="fa-solid fa-broom text-4xl text-yellow-300 mb-2"></i>
+                <p class="font-semibold text-sm mt-2">House Cleaning</p>
+            </div>
+            <div class="bg-white/15 backdrop-blur rounded-2xl p-5 text-center border border-white/20">
+                <i class="fa-solid fa-baby text-4xl text-yellow-300 mb-2"></i>
+                <p class="font-semibold text-sm mt-2">Daycare</p>
+            </div>
+            <div class="bg-white/15 backdrop-blur rounded-2xl p-5 text-center border border-white/20 mt-6">
+                <i class="fa-solid fa-building text-4xl text-yellow-300 mb-2"></i>
+                <p class="font-semibold text-sm mt-2">Office Cleaning</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search Bar -->
+<section class="bg-white shadow-md py-6 px-4">
+    <div class="max-w-3xl mx-auto flex gap-3">
+        <input type="text" placeholder="Search for a service (e.g. driver, cleaning, daycare...)"
+            class="flex-1 border border-gray-200 rounded-full px-6 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+        <a href="{% url 'category_list' %}" class="bg-blue-600 text-white px-6 py-3 rounded-full font-semibold text-sm hover:bg-blue-700 transition shadow">Search</a>
+    </div>
+</section>
+
+<!-- Service Categories -->
+<section class="max-w-7xl mx-auto px-6 py-20">
+    <div class="text-center mb-12">
+        <h2 class="text-3xl font-extrabold text-gray-800 mb-3">Our Services</h2>
+        <p class="text-gray-500 max-w-xl mx-auto">Everything you need, all in one place. Browse our wide range of professional services.</p>
+    </div>
+
+    {% if categories %}
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for category in categories %}
+        <a href="{% url 'category_detail' category.slug %}"
+            class="group bg-white rounded-2xl shadow hover:shadow-xl transition-all duration-300 p-6 text-center border border-gray-100 hover:border-blue-400 hover:-translate-y-1">
+            {% if category.image %}
+                <img src="{{ category.image.url }}" alt="{{ category.name }}" class="w-16 h-16 mx-auto mb-4 rounded-full object-cover">
+            {% else %}
+                <div class="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-2xl flex items-center justify-center group-hover:bg-blue-100 transition">
+                    {% if 'driver' in category.name|lower or 'car' in category.name|lower %}
+                        <i class="fa-solid fa-car text-blue-600 text-2xl"></i>
+                    {% elif 'clean' in category.name|lower and 'office' not in category.name|lower %}
+                        <i class="fa-solid fa-broom text-blue-600 text-2xl"></i>
+                    {% elif 'office' in category.name|lower %}
+                        <i class="fa-solid fa-building text-blue-600 text-2xl"></i>
+                    {% elif 'daycare' in category.name|lower or 'child' in category.name|lower or 'baby' in category.name|lower %}
+                        <i class="fa-solid fa-baby text-blue-600 text-2xl"></i>
+                    {% elif 'cook' in category.name|lower or 'chef' in category.name|lower %}
+                        <i class="fa-solid fa-utensils text-blue-600 text-2xl"></i>
+                    {% elif 'plumb' in category.name|lower %}
+                        <i class="fa-solid fa-wrench text-blue-600 text-2xl"></i>
+                    {% elif 'electr' in category.name|lower %}
+                        <i class="fa-solid fa-bolt text-blue-600 text-2xl"></i>
+                    {% elif 'tutor' in category.name|lower or 'teach' in category.name|lower %}
+                        <i class="fa-solid fa-book-open text-blue-600 text-2xl"></i>
+                    {% elif 'care' in category.name|lower or 'elder' in category.name|lower %}
+                        <i class="fa-solid fa-heart-pulse text-blue-600 text-2xl"></i>
+                    {% elif 'laundry' in category.name|lower %}
+                        <i class="fa-solid fa-shirt text-blue-600 text-2xl"></i>
+                    {% elif 'garden' in category.name|lower %}
+                        <i class="fa-solid fa-leaf text-blue-600 text-2xl"></i>
+                    {% elif 'security' in category.name|lower %}
+                        <i class="fa-solid fa-shield-halved text-blue-600 text-2xl"></i>
+                    {% else %}
+                        <i class="fa-solid fa-screwdriver-wrench text-blue-600 text-2xl"></i>
+                    {% endif %}
+                </div>
+            {% endif %}
+            <h3 class="font-bold text-gray-800 group-hover:text-blue-600 transition text-sm">{{ category.name }}</h3>
+            {% if category.description %}
+            <p class="text-gray-400 text-xs mt-1">{{ category.description|truncatechars:40 }}</p>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Default static categories when none added yet -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for item in default_services %}
+        <div class="bg-white rounded-2xl shadow hover:shadow-xl transition-all duration-300 p-6 text-center border border-gray-100 hover:border-blue-400 hover:-translate-y-1 cursor-pointer">
+            <div class="w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-2xl flex items-center justify-center">
+                <i class="{{ item.icon }} text-blue-600 text-2xl"></i>
+            </div>
+            <h3 class="font-bold text-gray-800 text-sm">{{ item.name }}</h3>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="text-center mt-10">
+        <a href="{% url 'category_list' %}" class="inline-block border-2 border-blue-600 text-blue-600 font-semibold px-8 py-3 rounded-full hover:bg-blue-600 hover:text-white transition">View All Services</a>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="bg-gradient-to-br from-gray-50 to-blue-50 py-20 px-6">
+    <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-extrabold text-gray-800 mb-3">How It Works</h2>
+            <p class="text-gray-500">Get started in 3 simple steps</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+            <div class="hidden md:block absolute top-10 left-1/4 right-1/4 h-0.5 bg-blue-200"></div>
+            <div class="bg-white rounded-2xl p-8 shadow text-center relative">
+                <div class="w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4 shadow-lg">1</div>
+                <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-magnifying-glass text-blue-600 text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-lg mb-2">Choose a Service</h3>
+                <p class="text-gray-500 text-sm">Browse our categories and find exactly what you need.</p>
+            </div>
+            <div class="bg-white rounded-2xl p-8 shadow text-center relative">
+                <div class="w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4 shadow-lg">2</div>
+                <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-calendar-days text-blue-600 text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-lg mb-2">Book a Provider</h3>
+                <p class="text-gray-500 text-sm">Pick a verified provider, select your date, time and location.</p>
+            </div>
+            <div class="bg-white rounded-2xl p-8 shadow text-center relative">
+                <div class="w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4 shadow-lg">3</div>
+                <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-circle-check text-blue-600 text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-lg mb-2">Get It Done</h3>
+                <p class="text-gray-500 text-sm">Provider arrives, completes the job. Pay securely and review.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="max-w-7xl mx-auto px-6 py-20">
+    <div class="text-center mb-12">
+        <h2 class="text-3xl font-extrabold text-gray-800 mb-3">Why Choose ServiceHub?</h2>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="text-center p-6 bg-white rounded-2xl shadow hover:shadow-lg transition">
+            <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-user-check text-green-600 text-2xl"></i>
+            </div>
+            <h4 class="font-bold mb-2">Verified Providers</h4>
+            <p class="text-gray-500 text-sm">Every provider is background-checked and approved by our team.</p>
+        </div>
+        <div class="text-center p-6 bg-white rounded-2xl shadow hover:shadow-lg transition">
+            <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-lock text-blue-600 text-2xl"></i>
+            </div>
+            <h4 class="font-bold mb-2">Secure Payments</h4>
+            <p class="text-gray-500 text-sm">Pay safely via Stripe or Paystack. Your money is protected.</p>
+        </div>
+        <div class="text-center p-6 bg-white rounded-2xl shadow hover:shadow-lg transition">
+            <div class="w-14 h-14 bg-yellow-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-star text-yellow-500 text-2xl"></i>
+            </div>
+            <h4 class="font-bold mb-2">Rated & Reviewed</h4>
+            <p class="text-gray-500 text-sm">Real reviews from real customers help you choose the best.</p>
+        </div>
+        <div class="text-center p-6 bg-white rounded-2xl shadow hover:shadow-lg transition">
+            <div class="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-headset text-purple-600 text-2xl"></i>
+            </div>
+            <h4 class="font-bold mb-2">24/7 Support</h4>
+            <p class="text-gray-500 text-sm">Our support team is always available to help you out.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Services Static Showcase -->
+<section class="bg-blue-600 py-16 px-6">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-10">
+            <h2 class="text-3xl font-extrabold text-white mb-2">Most Booked Services</h2>
+            <p class="text-blue-100">What our customers love most</p>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-white/15 border border-white/20 rounded-2xl p-5 text-center text-white hover:bg-white/25 transition cursor-pointer">
+                <i class="fa-solid fa-car text-3xl text-yellow-300 mb-3 block"></i>
+                <p class="font-semibold">Driver Booking</p>
+                <p class="text-blue-200 text-xs mt-1">Airport, events, daily trips</p>
+            </div>
+            <div class="bg-white/15 border border-white/20 rounded-2xl p-5 text-center text-white hover:bg-white/25 transition cursor-pointer">
+                <i class="fa-solid fa-broom text-3xl text-yellow-300 mb-3 block"></i>
+                <p class="font-semibold">House Cleaning</p>
+                <p class="text-blue-200 text-xs mt-1">Deep clean, regular, move-out</p>
+            </div>
+            <div class="bg-white/15 border border-white/20 rounded-2xl p-5 text-center text-white hover:bg-white/25 transition cursor-pointer">
+                <i class="fa-solid fa-baby text-3xl text-yellow-300 mb-3 block"></i>
+                <p class="font-semibold">Daycare</p>
+                <p class="text-blue-200 text-xs mt-1">Trusted childcare at home</p>
+            </div>
+            <div class="bg-white/15 border border-white/20 rounded-2xl p-5 text-center text-white hover:bg-white/25 transition cursor-pointer">
+                <i class="fa-solid fa-building text-3xl text-yellow-300 mb-3 block"></i>
+                <p class="font-semibold">Office Cleaning</p>
+                <p class="text-blue-200 text-xs mt-1">Daily, weekly, one-time</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Banner -->
+<section class="py-20 px-6 text-center bg-white">
+    <div class="max-w-2xl mx-auto">
+        <h2 class="text-3xl font-extrabold text-gray-800 mb-4">Ready to get started?</h2>
+        <p class="text-gray-500 mb-8">Join thousands of happy customers who trust ServiceHub for their everyday needs.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'register_customer' %}" class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-700 transition shadow-lg">Book a Service</a>
+            <a href="{% url 'register_provider' %}" class="border-2 border-blue-600 text-blue-600 px-8 py-3 rounded-full font-bold hover:bg-blue-50 transition">Offer Your Services</a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

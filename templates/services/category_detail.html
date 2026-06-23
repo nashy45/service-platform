@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ category.name }} - ServiceHub{% endblock %}
+{% block content %}
+
+<!-- Header -->
+<section class="bg-gradient-to-br from-blue-700 to-indigo-700 text-white py-14 px-6">
+    <div class="max-w-7xl mx-auto">
+        <a href="{% url 'category_list' %}" class="text-blue-200 text-sm hover:text-white mb-3 inline-block">
+            <i class="fa-solid fa-arrow-left mr-1"></i> All Services
+        </a>
+        <h1 class="text-4xl font-extrabold mb-2">{{ category.name }}</h1>
+        <p class="text-blue-100 text-lg max-w-xl">{{ category.description }}</p>
+        <p class="text-blue-200 text-sm mt-3"><i class="fa-solid fa-briefcase mr-1"></i> {{ services|length }} service{{ services|length|pluralize }} available</p>
+    </div>
+</section>
+
+<!-- Services Grid -->
+<section class="max-w-7xl mx-auto px-6 py-12">
+    {% if services %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for service in services %}
+        <div class="bg-white rounded-2xl shadow hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
+            <!-- Card Header -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-t-2xl p-6 flex items-start justify-between">
+                <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-briefcase text-white text-lg"></i>
+                </div>
+                <span class="bg-white text-blue-700 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                    {{ service.get_price_type_display }}
+                </span>
+            </div>
+            <!-- Card Body -->
+            <div class="p-6 flex flex-col flex-1">
+                <h3 class="font-bold text-gray-800 text-lg mb-1">{{ service.title }}</h3>
+                <p class="text-gray-500 text-sm mb-4 flex-1">{{ service.description|truncatechars:90 }}</p>
+
+                <!-- Provider info -->
+                <div class="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-xl">
+                    <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm flex-shrink-0">
+                        {{ service.provider.user.first_name|first|upper|default:service.provider.user.email|first|upper }}
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-700">{{ service.provider.user.get_full_name|default:service.provider.user.username }}</p>
+                        <div class="flex items-center gap-1 text-xs text-gray-400">
+                            <i class="fa-solid fa-star text-yellow-400 text-[10px]"></i>
+                            {{ service.provider.rating }} &bull; {{ service.provider.total_jobs }} jobs
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Price + Duration -->
+                <div class="flex items-center justify-between mb-5">
+                    <div>
+                        <span class="text-2xl font-extrabold text-blue-600">{{ service.price }} FCFA</span>
+                        <span class="text-gray-400 text-xs ml-1">/ {{ service.get_price_type_display }}</span>
+                    </div>
+                    <span class="text-gray-400 text-xs"><i class="fa-solid fa-clock mr-1"></i>~{{ service.duration_hours }}h</span>
+                </div>
+
+                <a href="{% url 'service_detail' service.pk %}"
+                   class="block text-center bg-blue-600 text-white py-2.5 rounded-xl font-semibold hover:bg-blue-700 transition text-sm">
+                    <i class="fa-solid fa-calendar-check mr-1"></i> View & Book
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-24">
+        <div class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <i class="fa-solid fa-briefcase text-blue-300 text-3xl"></i>
+        </div>
+        <h3 class="text-gray-600 font-bold text-xl mb-2">No services yet</h3>
+        <p class="text-gray-400 mb-6">No providers have listed services in this category yet.</p>
+        <a href="{% url 'category_list' %}" class="inline-block bg-blue-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-700 transition">
+            Browse Other Categories
+        </a>
+    </div>
+    {% endif %}
+</section>
+
+{% endblock %}

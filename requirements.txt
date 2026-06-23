@@ -1,0 +1,25 @@
+# Core
+Django==4.2.5
+
+# Authentication / forms
+django-allauth==0.59.1
+django-crispy-forms==1.14.0
+django-crispy-tailwind==1.0.0
+
+# Async / realtime
+channels==4.0.0
+asgiref==3.7.2
+
+# Images / storage
+Pillow==9.5.0
+django-cloudinary-storage==0.3.0  # optional: only if using Cloudinary
+cloudinary==1.29.0                 # optional
+
+# Payments
+stripe==5.0.0
+
+# Database (optional - needed if switching to Postgres)
+psycopg2-binary==2.9.6
+
+# Notes: adjust versions if you need newer releases. Install with:
+# pip install -r requirements.txt

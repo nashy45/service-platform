@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}My Dashboard - ServiceHub{% endblock %}
+{% block content %}
+
+<div class="flex min-h-screen bg-gray-100">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex flex-col">
+        <div class="px-6 py-6 border-b">
+            <div class="flex items-center gap-3">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" class="w-11 h-11 rounded-full object-cover ring-2 ring-blue-500">
+                {% else %}
+                    <div class="w-11 h-11 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                        {{ user.first_name|first|upper|default:user.email|first|upper }}
+                    </div>
+                {% endif %}
+                <div>
+                    <p class="font-semibold text-gray-800 text-sm">{{ user.get_full_name|default:user.username }}</p>
+                    <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Customer</span>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-1 text-sm font-medium">
+            <a href="{% url 'dashboard' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-blue-50 text-blue-700 font-semibold">
+                <i class="fa-solid fa-gauge w-4"></i> Dashboard
+            </a>
+            <a href="{% url 'my_bookings' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition">
+                <i class="fa-solid fa-calendar-check w-4"></i> My Bookings
+            </a>
+            <a href="{% url 'category_list' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition">
+                <i class="fa-solid fa-grid-2 w-4"></i> Browse Services
+            </a>
+            <a href="{% url 'provider_list' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition">
+                <i class="fa-solid fa-users w-4"></i> Providers
+            </a>
+            <a href="{% url 'profile' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition">
+                <i class="fa-solid fa-user-pen w-4"></i> Edit Profile
+            </a>
+            <div class="pt-4 border-t mt-4">
+                <a href="{% url 'logout' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-500 hover:bg-red-50 transition">
+                    <i class="fa-solid fa-right-from-bracket w-4"></i> Logout
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">Welcome back, {{ user.first_name|default:user.username }} <span class="wave">👋</span></h1>
+                <p class="text-gray-400 text-sm">Here's what's happening with your bookings.</p>
+            </div>
+            <a href="{% url 'category_list' %}" class="bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition shadow">
+                <i class="fa-solid fa-plus mr-1"></i> New Booking
+            </a>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-6 space-y-6">
+
+            <!-- Stat Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-calendar-days text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-800">{{ total }}</p>
+                        <p class="text-xs text-gray-400">Total Bookings</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-circle-check text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-800">{{ completed }}</p>
+                        <p class="text-xs text-gray-400">Completed</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-clock text-yellow-500 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-800">{{ pending }}</p>
+                        <p class="text-xs text-gray-400">Pending</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-thumbs-up text-indigo-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-800">{{ confirmed }}</p>
+                        <p class="text-xs text-gray-400">Confirmed</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Bookings Table -->
+            <div class="bg-white rounded-2xl shadow">
+                <div class="flex items-center justify-between px-6 py-4 border-b">
+                    <h2 class="font-bold text-gray-800 text-base"><i class="fa-solid fa-clock-rotate-left mr-2 text-blue-500"></i>Recent Bookings</h2>
+                    <a href="{% url 'my_bookings' %}" class="text-blue-600 text-sm font-medium hover:underline">View all</a>
+                </div>
+                {% if bookings %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-400 text-xs uppercase tracking-wide">
+                                <th class="text-left px-6 py-3">Service</th>
+                                <th class="text-left px-6 py-3">Provider</th>
+                                <th class="text-left px-6 py-3">Date</th>
+                                <th class="text-left px-6 py-3">Status</th>
+                                <th class="text-left px-6 py-3">Amount</th>
+                                <th class="text-left px-6 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            {% for booking in bookings %}
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-4 font-medium text-gray-800">{{ booking.service.title }}</td>
+                                <td class="px-6 py-4 text-gray-500">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs font-bold">
+                                            {{ booking.provider.user.first_name|first|upper|default:"P" }}
+                                        </div>
+                                        {{ booking.provider.user.get_full_name|default:booking.provider.user.username }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-gray-500">{{ booking.booking_date }}</td>
+                                <td class="px-6 py-4">
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                        {% if booking.status == 'completed' %}bg-green-100 text-green-700
+                                        {% elif booking.status == 'confirmed' %}bg-blue-100 text-blue-700
+                                        {% elif booking.status == 'in_progress' %}bg-purple-100 text-purple-700
+                                        {% elif booking.status == 'cancelled' %}bg-red-100 text-red-700
+                                        {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                                        <i class="fa-solid fa-circle text-[6px] mr-1 align-middle"></i>
+                                        {{ booking.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 font-semibold text-gray-800">{{ booking.total_price }} FCFA</td>
+                                <td class="px-6 py-4">
+                                    <a href="{% url 'booking_detail' booking.pk %}" class="text-blue-600 hover:text-blue-800 text-xs font-medium">
+                                        View <i class="fa-solid fa-arrow-right ml-1"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-16">
+                    <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-calendar-xmark text-blue-400 text-2xl"></i>
+                    </div>
+                    <p class="text-gray-500 font-medium">No bookings yet</p>
+                    <p class="text-gray-400 text-sm mt-1">Start by browsing our services</p>
+                    <a href="{% url 'category_list' %}" class="inline-block mt-4 bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition">
+                        Browse Services
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <a href="{% url 'category_list' %}" class="bg-white rounded-2xl shadow p-5 flex items-center gap-4 hover:shadow-md transition group">
+                    <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center group-hover:bg-blue-100 transition">
+                        <i class="fa-solid fa-magnifying-glass text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800 text-sm">Browse Services</p>
+                        <p class="text-gray-400 text-xs">Find what you need</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 ml-auto"></i>
+                </a>
+                <a href="{% url 'provider_list' %}" class="bg-white rounded-2xl shadow p-5 flex items-center gap-4 hover:shadow-md transition group">
+                    <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center group-hover:bg-green-100 transition">
+                        <i class="fa-solid fa-users text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800 text-sm">Find Providers</p>
+                        <p class="text-gray-400 text-xs">Browse verified pros</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 ml-auto"></i>
+                </a>
+                <a href="{% url 'profile' %}" class="bg-white rounded-2xl shadow p-5 flex items-center gap-4 hover:shadow-md transition group">
+                    <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center group-hover:bg-purple-100 transition">
+                        <i class="fa-solid fa-user-pen text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800 text-sm">Edit Profile</p>
+                        <p class="text-gray-400 text-xs">Update your info</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 ml-auto"></i>
+                </a>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+{% endblock %}

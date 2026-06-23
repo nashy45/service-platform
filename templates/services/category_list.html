@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}All Services - ServiceHub{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <h1 class="text-3xl font-bold text-center mb-10">Browse Services</h1>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for category in categories %}
+        <a href="{% url 'category_detail' category.slug %}" class="bg-white rounded-xl shadow hover:shadow-lg transition p-6 text-center group">
+            {% if category.image %}
+                <img src="{{ category.image.url }}" alt="{{ category.name }}" class="w-16 h-16 mx-auto mb-3 rounded-full object-cover">
+            {% else %}
+                <div class="w-16 h-16 mx-auto mb-3 bg-blue-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-tools text-blue-600 text-2xl"></i>
+                </div>
+            {% endif %}
+            <h3 class="font-semibold group-hover:text-blue-600">{{ category.name }}</h3>
+            <p class="text-gray-400 text-xs mt-1">{{ category.description|truncatechars:50 }}</p>
+        </a>
+        {% empty %}
+        <p class="col-span-4 text-center text-gray-500 py-10">No service categories available yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

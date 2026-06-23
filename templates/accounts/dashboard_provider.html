@@ -1,0 +1,317 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Provider Dashboard - ServiceHub{% endblock %}
+{% block content %}
+
+<div class="flex min-h-screen bg-gray-100">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg flex-shrink-0 hidden md:flex flex-col">
+        <div class="px-6 py-6 border-b">
+            <div class="flex items-center gap-3">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" class="w-11 h-11 rounded-full object-cover ring-2 ring-green-500">
+                {% else %}
+                    <div class="w-11 h-11 rounded-full bg-green-600 flex items-center justify-center text-white font-bold text-lg">
+                        {{ user.first_name|first|upper|default:user.email|first|upper }}
+                    </div>
+                {% endif %}
+                <div>
+                    <p class="font-semibold text-gray-800 text-sm">{{ user.get_full_name|default:user.username }}</p>
+                    <span class="text-xs
+                        {% if profile.status == 'approved' %}bg-green-100 text-green-700
+                        {% elif profile.status == 'pending' %}bg-yellow-100 text-yellow-700
+                        {% else %}bg-red-100 text-red-700{% endif %}
+                        px-2 py-0.5 rounded-full capitalize">
+                        <i class="fa-solid fa-circle text-[6px] mr-1 align-middle"></i>{{ profile.status }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-1 text-sm font-medium">
+            <a href="{% url 'dashboard' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-green-50 text-green-700 font-semibold">
+                <i class="fa-solid fa-gauge w-4"></i> Dashboard
+            </a>
+            <a href="{% url 'my_bookings' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-green-600 transition">
+                <i class="fa-solid fa-calendar-check w-4"></i> My Bookings
+            </a>
+            <a href="{% url 'my_services' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-green-600 transition">
+                <i class="fa-solid fa-briefcase w-4"></i> My Services
+            </a>
+            <a href="{% url 'category_list' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-green-600 transition">
+                <i class="fa-solid fa-briefcase w-4"></i> Services
+            </a>
+            <a href="{% url 'profile' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-green-600 transition">
+                <i class="fa-solid fa-user-pen w-4"></i> Edit Profile
+            </a>
+            <div class="pt-4 border-t mt-4">
+                <a href="{% url 'logout' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-500 hover:bg-red-50 transition">
+                    <i class="fa-solid fa-right-from-bracket w-4"></i> Logout
+                </a>
+            </div>
+        </nav>
+        <!-- Availability Toggle -->
+        <div class="px-6 py-4 border-t">
+            <form method="post" action="{% url 'toggle_availability' %}">
+                {% csrf_token %}
+                <button type="submit" class="w-full flex items-center justify-between group">
+                    <span class="text-sm text-gray-600 font-medium">
+                        <i class="fa-solid fa-circle mr-2 text-xs
+                            {% if profile.is_available %}text-green-500{% else %}text-gray-300{% endif %}"></i>
+                        {% if profile.is_available %}Available{% else %}Unavailable{% endif %}
+                    </span>
+                    <!-- Toggle switch -->
+                    <div class="relative w-11 h-6 rounded-full transition-colors duration-200
+                        {% if profile.is_available %}bg-green-500{% else %}bg-gray-300{% endif %}">
+                        <div class="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200
+                            {% if profile.is_available %}left-5{% else %}left-0.5{% endif %}"></div>
+                    </div>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">Provider Dashboard</h1>
+                <p class="text-gray-400 text-sm">Manage your bookings and track your performance.</p>
+            </div>
+            {% if profile.status == 'pending' %}
+            <span class="bg-yellow-100 text-yellow-700 text-xs font-semibold px-4 py-2 rounded-full">
+                <i class="fa-solid fa-hourglass-half mr-1"></i> Awaiting Approval
+            </span>
+            {% elif profile.status == 'rejected' %}
+            <span class="bg-red-100 text-red-700 text-xs font-semibold px-4 py-2 rounded-full">
+                <i class="fa-solid fa-ban mr-1"></i> Account Rejected
+            </span>
+            {% else %}
+            <span class="bg-green-100 text-green-700 text-xs font-semibold px-4 py-2 rounded-full">
+                <i class="fa-solid fa-circle-check mr-1"></i> Active Provider
+            </span>
+            {% endif %}
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-6 space-y-6">
+
+            {% if profile.status == 'pending' %}
+            <div class="bg-yellow-50 border border-yellow-200 rounded-2xl p-5 flex items-start gap-4">
+                <div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-hourglass-half text-yellow-600"></i>
+                </div>
+                <div>
+                    <p class="font-semibold text-yellow-800">Your account is under review</p>
+                    <p class="text-yellow-700 text-sm mt-1">Our team is verifying your profile. You'll receive a notification once approved. This usually takes 24–48 hours.</p>
+                </div>
+            </div>
+            {% elif profile.status == 'rejected' %}
+            <div class="bg-red-50 border border-red-200 rounded-2xl p-5 flex items-start gap-4">
+                <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-circle-xmark text-red-600"></i>
+                </div>
+                <div>
+                    <p class="font-semibold text-red-800">Account not approved</p>
+                    <p class="text-red-700 text-sm mt-1">Your provider application was rejected. Please contact <a href="mailto:support@servicehub.com" class="underline">support@servicehub.com</a> for more information.</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Stat Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-briefcase text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-800">{{ total }}</p>
+                        <p class="text-xs text-gray-400">Total Jobs</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-circle-check text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-800">{{ completed }}</p>
+                        <p class="text-xs text-gray-400">Completed</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-clock text-yellow-500 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-800">{{ pending }}</p>
+                        <p class="text-xs text-gray-400">Pending</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-star text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-800">{{ profile.rating }}</p>
+                        <p class="text-xs text-gray-400">Avg Rating</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Summary + Bookings -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Profile Card -->
+                <div class="bg-white rounded-2xl shadow p-6 flex flex-col items-center text-center">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" class="w-20 h-20 rounded-full object-cover ring-4 ring-green-100 mb-4">
+                    {% else %}
+                        <div class="w-20 h-20 rounded-full bg-green-600 flex items-center justify-center text-white font-bold text-3xl mb-4">
+                            {{ user.first_name|first|upper|default:user.email|first|upper }}
+                        </div>
+                    {% endif %}
+                    <h3 class="font-bold text-gray-800">{{ user.get_full_name|default:user.username }}</h3>
+                    <p class="text-gray-400 text-sm mt-1">{{ profile.service_area|default:"Service Area not set" }}</p>
+                    <div class="flex items-center gap-1 mt-2 text-yellow-500 text-sm">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= profile.rating %}
+                                <i class="fa-solid fa-star"></i>
+                            {% else %}
+                                <i class="fa-regular fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <span class="text-gray-500 ml-1">({{ profile.rating }})</span>
+                    </div>
+                    <div class="w-full mt-4 space-y-2 text-sm text-left">
+                        <div class="flex justify-between py-2 border-b">
+                            <span class="text-gray-400"><i class="fa-solid fa-briefcase mr-2"></i>Experience</span>
+                            <span class="font-medium">{{ profile.years_experience }} yrs</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b">
+                            <span class="text-gray-400"><i class="fa-solid fa-coins mr-2"></i>Hourly Rate</span>
+                            <span class="font-medium">{{ profile.hourly_rate }} FCFA/hr</span>
+                        </div>
+                        <div class="flex justify-between py-2">
+                            <span class="text-gray-400"><i class="fa-solid fa-check-double mr-2"></i>Jobs Done</span>
+                            <span class="font-medium">{{ profile.total_jobs }}</span>
+                        </div>
+                    </div>
+                    <a href="{% url 'profile' %}" class="mt-5 w-full bg-green-600 text-white py-2 rounded-xl text-sm font-semibold hover:bg-green-700 transition">
+                        <i class="fa-solid fa-pen mr-1"></i> Edit Profile
+                    </a>
+                </div>
+
+                <!-- Recent Bookings -->
+                <div class="lg:col-span-2 bg-white rounded-2xl shadow">
+                    <div class="flex items-center justify-between px-6 py-4 border-b">
+                        <h2 class="font-bold text-gray-800 text-base"><i class="fa-solid fa-clock-rotate-left mr-2 text-green-500"></i>Recent Bookings</h2>
+                        <a href="{% url 'my_bookings' %}" class="text-green-600 text-sm font-medium hover:underline">View all</a>
+                    </div>
+                    {% if bookings %}
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-400 text-xs uppercase tracking-wide">
+                                    <th class="text-left px-6 py-3">Customer</th>
+                                    <th class="text-left px-6 py-3">Service</th>
+                                    <th class="text-left px-6 py-3">Date</th>
+                                    <th class="text-left px-6 py-3">Status</th>
+                                    <th class="text-left px-6 py-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                {% for booking in bookings %}
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center text-green-700 text-xs font-bold">
+                                                {{ booking.customer.first_name|first|upper|default:"C" }}
+                                            </div>
+                                            <span class="text-gray-700 font-medium">{{ booking.customer.get_full_name|default:booking.customer.username }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-500">{{ booking.service.title }}</td>
+                                    <td class="px-6 py-4 text-gray-500">{{ booking.booking_date }}</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                            {% if booking.status == 'completed' %}bg-green-100 text-green-700
+                                            {% elif booking.status == 'confirmed' %}bg-blue-100 text-blue-700
+                                            {% elif booking.status == 'in_progress' %}bg-purple-100 text-purple-700
+                                            {% elif booking.status == 'cancelled' %}bg-red-100 text-red-700
+                                            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                                            <i class="fa-solid fa-circle text-[6px] mr-1 align-middle"></i>
+                                            {{ booking.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <a href="{% url 'booking_detail' booking.pk %}" class="text-green-600 hover:text-green-800 text-xs font-medium">
+                                            View <i class="fa-solid fa-arrow-right ml-1"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-16">
+                        <div class="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fa-solid fa-calendar-xmark text-green-400 text-2xl"></i>
+                        </div>
+                        <p class="text-gray-500 font-medium">No bookings yet</p>
+                        <p class="text-gray-400 text-sm mt-1">Bookings from customers will appear here</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <a href="{% url 'my_services' %}" class="bg-white rounded-2xl shadow p-5 flex items-center gap-4 hover:shadow-md transition group">
+                    <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center group-hover:bg-blue-100 transition">
+                        <i class="fa-solid fa-calendar-check text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800 text-sm">All Bookings</p>
+                        <p class="text-gray-400 text-xs">Manage your schedule</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 ml-auto"></i>
+                </a>
+                <a href="{% url 'add_service' %}" class="bg-white rounded-2xl shadow p-5 flex items-center gap-4 hover:shadow-md transition group">
+                    <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center group-hover:bg-green-100 transition">
+                        <i class="fa-solid fa-plus text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800 text-sm">Add Service</p>
+                        <p class="text-gray-400 text-xs">List a new service</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 ml-auto"></i>
+                </a>
+                <a href="{% url 'profile' %}" class="bg-white rounded-2xl shadow p-5 flex items-center gap-4 hover:shadow-md transition group">
+                    <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center group-hover:bg-green-100 transition">
+                        <i class="fa-solid fa-user-pen text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800 text-sm">Update Profile</p>
+                        <p class="text-gray-400 text-xs">Keep your info current</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 ml-auto"></i>
+                </a>
+                <a href="{% url 'my_services' %}" class="bg-white rounded-2xl shadow p-5 flex items-center gap-4 hover:shadow-md transition group">
+                    <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center group-hover:bg-purple-100 transition">
+                        <i class="fa-solid fa-grid-2 text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800 text-sm">Browse Services</p>
+                        <p class="text-gray-400 text-xs">See all categories</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 ml-auto"></i>
+                </a>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Leave a Review - ServiceHub{% endblock %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 bg-gray-50">
+    <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-lg">
+
+        <div class="w-14 h-14 bg-yellow-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <i class="fa-solid fa-star text-yellow-500 text-2xl"></i>
+        </div>
+
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-1">Leave a Review</h1>
+        <p class="text-center text-gray-400 text-sm mb-2">How was your experience?</p>
+        <p class="text-center text-blue-600 font-semibold text-sm mb-7">
+            <i class="fa-solid fa-briefcase mr-1"></i>{{ booking.service.title }}
+            <span class="text-gray-400 font-normal mx-1">by</span>
+            {{ booking.provider.user.get_full_name|default:booking.provider.user.username }}
+        </p>
+
+        <form method="post" novalidate id="review-form">
+            {% csrf_token %}
+
+            <!-- Star Rating -->
+            <div class="mb-7">
+                <label class="block text-sm font-semibold text-gray-700 mb-3 text-center">
+                    Tap to rate your experience
+                </label>
+
+                <!-- Hidden input that stores the value -->
+                <input type="hidden" name="rating" id="rating-value" value="">
+
+                <!-- Stars -->
+                <div class="flex justify-center gap-3" id="star-container">
+                    {% for i in "12345" %}
+                    <button type="button"
+                        data-value="{{ forloop.counter }}"
+                        onclick="setRating({{ forloop.counter }})"
+                        onmouseover="hoverRating({{ forloop.counter }})"
+                        onmouseout="resetHover()"
+                        class="star-btn text-5xl text-gray-200 hover:scale-110 transition-transform duration-100 focus:outline-none leading-none">
+                        <i class="fa-solid fa-star"></i>
+                    </button>
+                    {% endfor %}
+                </div>
+
+                <!-- Rating label -->
+                <p id="rating-label" class="text-center text-sm text-gray-400 mt-3 h-5"></p>
+                <p id="rating-error" class="text-center text-red-500 text-xs mt-1 hidden">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i>Please select a rating before submitting.
+                </p>
+            </div>
+
+            <!-- Comment -->
+            <div class="mb-7">
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                    <i class="fa-solid fa-comment mr-1 text-blue-500"></i> Comment
+                    <span class="text-gray-400 font-normal">(optional)</span>
+                </label>
+                <textarea name="comment" rows="4"
+                    placeholder="Share your experience — what went well, what could be better..."
+                    class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none"></textarea>
+            </div>
+
+            <button type="submit" id="submit-btn"
+                class="w-full bg-yellow-500 text-white py-3 rounded-xl font-bold hover:bg-yellow-600 transition shadow text-sm">
+                <i class="fa-solid fa-paper-plane mr-2"></i>Submit Review
+            </button>
+        </form>
+
+        <div class="text-center mt-5">
+            <a href="{% url 'booking_detail' booking.pk %}" class="text-gray-400 text-sm hover:underline">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back to Booking
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.star-btn { color: #e5e7eb; transition: color 0.1s, transform 0.1s; }
+.star-btn.active { color: #f59e0b; }
+.star-btn.hover { color: #fbbf24; }
+</style>
+
+<script>
+const labels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+let currentRating = 0;
+
+function setRating(value) {
+    currentRating = value;
+    document.getElementById('rating-value').value = value;
+    document.getElementById('rating-label').textContent = labels[value];
+    document.getElementById('rating-label').className = 'text-center text-sm font-semibold mt-3 h-5 text-yellow-500';
+    document.getElementById('rating-error').classList.add('hidden');
+    updateStars(value, 'active');
+}
+
+function hoverRating(value) {
+    updateStars(value, 'hover');
+    document.getElementById('rating-label').textContent = labels[value];
+    document.getElementById('rating-label').className = 'text-center text-sm mt-3 h-5 text-gray-500';
+}
+
+function resetHover() {
+    updateStars(currentRating, 'active');
+    document.getElementById('rating-label').textContent = currentRating ? labels[currentRating] : '';
+    if (currentRating) {
+        document.getElementById('rating-label').className = 'text-center text-sm font-semibold mt-3 h-5 text-yellow-500';
+    }
+}
+
+function updateStars(value, cls) {
+    document.querySelectorAll('.star-btn').forEach((btn, idx) => {
+        btn.classList.remove('active', 'hover');
+        if (idx < value) btn.classList.add(cls);
+    });
+}
+
+// Validate before submit
+document.getElementById('review-form').addEventListener('submit', function(e) {
+    if (!currentRating) {
+        e.preventDefault();
+        document.getElementById('rating-error').classList.remove('hidden');
+        document.getElementById('star-container').scrollIntoView({behavior: 'smooth', block: 'center'});
+    }
+});
+</script>
+{% endblock %}

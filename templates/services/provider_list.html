@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Service Providers - ServiceHub{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <h1 class="text-3xl font-bold text-center mb-10">Our Service Providers</h1>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for provider in providers %}
+        <div class="bg-white rounded-xl shadow hover:shadow-lg transition p-6">
+            <div class="flex items-center gap-4 mb-4">
+                {% if provider.user.profile_picture %}
+                    <img src="{{ provider.user.profile_picture.url }}" class="w-14 h-14 rounded-full object-cover">
+                {% else %}
+                    <div class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl">
+                        {{ provider.user.username|first|upper }}
+                    </div>
+                {% endif %}
+                <div>
+                    <h3 class="font-semibold text-lg">{{ provider.user.get_full_name|default:provider.user.username }}</h3>
+                    <p class="text-gray-400 text-sm">{{ provider.service_area }}</p>
+                </div>
+            </div>
+            <p class="text-gray-500 text-sm mb-4">{{ provider.bio|truncatechars:100 }}</p>
+            <div class="flex items-center justify-between text-sm mb-4">
+                <span class="text-yellow-500"><i class="fa-solid fa-star"></i> {{ provider.rating }}/5</span>
+                <span class="text-gray-400">{{ provider.total_jobs }} jobs</span>
+                <span class="text-blue-600 font-medium">{{ provider.hourly_rate }} FCFA/hr</span>
+            </div>
+            <a href="{% url 'provider_detail' provider.pk %}" class="block text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium">View Profile</a>
+        </div>
+        {% empty %}
+        <p class="col-span-3 text-center text-gray-500 py-10">No providers available yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
