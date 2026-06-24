@@ -1,15 +1,25 @@
 from pathlib import Path
 import os
-from decouple import config
-import dj_database_url
+try:
+    from decouple import config
+    import dj_database_url
+    USE_PRODUCTION_SETTINGS = True
+except ImportError:
+    # For local development without production packages
+    USE_PRODUCTION_SETTINGS = False
+    def config(key, default=None, cast=None):
+        return os.environ.get(key, default)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-pai!+qw5(ue^lvgxfzdl_5z_(8&z%ch!e(86zb(*m_!0qp++a2')
-
-DEBUG = config('DEBUG', default=True, cast=bool)
-
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
+if USE_PRODUCTION_SETTINGS:
+    SECRET_KEY = config('SECRET_KEY', default='django-insecure-pai!+qw5(ue^lvgxfzdl_5z_(8&z%ch!e(86zb(*m_!0qp++a2')
+    DEBUG = config('DEBUG', default=True, cast=bool)
+    ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
+else:
+    SECRET_KEY = 'django-insecure-pai!+qw5(ue^lvgxfzdl_5z_(8&z%ch!e(86zb(*m_!0qp++a2'
+    DEBUG = True
+    ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -67,12 +77,20 @@ TEMPLATES = [
 WSGI_APPLICATION = 'service_platform.wsgi.application'
 ASGI_APPLICATION = 'service_platform.asgi.application'
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
-        conn_max_age=600
-    )
-}
+if USE_PRODUCTION_SETTINGS and 'DATABASE_URL' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+            conn_max_age=600
+        )
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -141,9 +159,14 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = False
-CSRF_TRUSTED_ORIGINS = config(
-    'CSRF_TRUSTED_ORIGINS',
-    default='http://127.0.0.1:8000,http://localhost:8000'
-).split(',')
+
+if USE_PRODUCTION_SETTINGS:
+    CSRF_TRUSTED_ORIGINS = config(
+        'CSRF_TRUSTED_ORIGINS',
+        default='http://127.0.0.1:8000,http://localhost:8000'
+    ).split(',')
+else:
+    CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000']
+
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'

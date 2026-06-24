@@ -1,25 +1,25 @@
 # Core
-Django==4.2.5
+Django==5.2.12
 
 # Authentication / forms
-django-allauth==65.14.1
-django-crispy-forms==1.14.0
-django-crispy-tailwind==1.0.0
+django-allauth==65.16.1
+django-crispy-forms==2.6
+crispy-tailwind==1.0.3
 
 # Async / realtime
-channels==4.0.0
+channels==4.3.2
 asgiref==3.7.2
 
 # Images / storage
-Pillow==9.5.0
+Pillow==10.1.0
 django-cloudinary-storage==0.3.0
 cloudinary==1.29.0
 
 # Payments
-stripe==5.0.0
+stripe==15.1.0
 
 # Database
-psycopg2-binary==2.9.6
+psycopg2-binary==2.9.11
 dj-database-url==2.1.0
 
 # Production server
@@ -28,3 +28,9 @@ whitenoise==6.5.0
 
 # Environment variables
 python-decouple==3.8
+
+# Additional (already installed locally)
+django-cors-headers==4.9.0
+django-environ==0.13.0
+djangorestframework==3.16.1
+djangorestframework-simplejwt==5.5.1
