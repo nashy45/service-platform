@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: service-platform
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn service_platform.wsgi:application"
+    envVars:
+      - key: DEBUG
+        value: False
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.11.5
+      - key: DATABASE_URL
+        fromDatabase:
+          name: service-platform-db
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false
+
+databases:
+  - name: service-platform-db
+    plan: free
+    databaseName: service_platform_db
+    user: service_platform_user

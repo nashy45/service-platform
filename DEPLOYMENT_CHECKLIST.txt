@@ -1,0 +1,210 @@
+═══════════════════════════════════════════════════════════════
+  RENDER DEPLOYMENT CHECKLIST - Service Platform
+═══════════════════════════════════════════════════════════════
+
+📋 BEFORE YOU START
+═══════════════════════════════════════════════════════════════
+☐ Render account created (https://render.com)
+☐ GitHub account ready
+☐ All code changes saved
+
+
+STEP 1: PUSH TO GITHUB (5 min)
+═══════════════════════════════════════════════════════════════
+☐ Create new GitHub repository at https://github.com/new
+   Repository name: service-platform (or your choice)
+   
+☐ Open terminal in: c:\Users\fombu\OneDrive\Desktop\service\service_platform
+
+☐ Run these commands:
+   □ git init
+   □ git add .
+   □ git commit -m "Ready for Render deployment"
+   □ git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+   □ git branch -M main
+   □ git push -u origin main
+
+☐ Verify code is on GitHub
+
+
+STEP 2: CREATE DATABASE ON RENDER (2 min)
+═══════════════════════════════════════════════════════════════
+☐ Go to https://dashboard.render.com
+☐ Click "New +" button
+☐ Select "PostgreSQL"
+☐ Fill in:
+   □ Name: service-platform-db
+   □ Database: service_platform_db
+   □ Region: (closest to you)
+   □ Instance Type: Free
+☐ Click "Create Database"
+☐ Wait for "Available" status
+☐ COPY Internal Database URL (you'll need this!)
+   Save it here: ________________________________
+
+
+STEP 3: CREATE WEB SERVICE (3 min)
+═══════════════════════════════════════════════════════════════
+☐ Click "New +" → "Web Service"
+☐ Connect GitHub repository
+☐ Select your repository
+☐ Fill in:
+   □ Name: service-platform (your URL will be this.onrender.com)
+   □ Region: (same as database)
+   □ Branch: main
+   □ Root Directory: (leave blank if Django is in root)
+   □ Runtime: Python 3
+   □ Build Command: ./build.sh
+   □ Start Command: gunicorn service_platform.wsgi:application
+   □ Instance Type: Free
+
+
+STEP 4: ENVIRONMENT VARIABLES
+═══════════════════════════════════════════════════════════════
+☐ Click "Advanced" button
+☐ Add these variables one by one:
+
+   Variable 1:
+   □ Key: SECRET_KEY
+   □ Value: [Generate at https://djecrety.ir/]
+      Copy here: ________________________________
+
+   Variable 2:
+   □ Key: DEBUG
+   □ Value: False
+
+   Variable 3:
+   □ Key: ALLOWED_HOSTS
+   □ Value: service-platform.onrender.com
+      (or your-chosen-name.onrender.com)
+
+   Variable 4:
+   □ Key: DATABASE_URL
+   □ Value: [Paste Internal Database URL from Step 2]
+
+   Variable 5:
+   □ Key: CSRF_TRUSTED_ORIGINS
+   □ Value: https://service-platform.onrender.com
+      (or https://your-chosen-name.onrender.com)
+
+   Variable 6:
+   □ Key: PYTHON_VERSION
+   □ Value: 3.11.5
+
+☐ Click "Create Web Service"
+
+
+STEP 5: MONITOR DEPLOYMENT (10 min)
+═══════════════════════════════════════════════════════════════
+☐ Watch the deployment logs
+☐ Look for these success messages:
+   □ "Installing dependencies from requirements.txt"
+   □ "Collecting static files"
+   □ "Running migrations"
+   □ "Starting gunicorn"
+☐ Wait for "Live" status (green indicator)
+
+
+STEP 6: CREATE ADMIN USER
+═══════════════════════════════════════════════════════════════
+☐ In Render dashboard, click your web service
+☐ Click "Shell" tab
+☐ Click "Launch Shell" button
+☐ Run: python manage.py createsuperuser
+☐ Enter:
+   □ Email: admin@servicehub.com
+   □ Password: admin123 (or your choice)
+   □ Password confirmation: (same)
+   □ Role: admin
+
+
+STEP 7: TEST YOUR SITE
+═══════════════════════════════════════════════════════════════
+Your site URL: https://service-platform.onrender.com
+(replace with your actual name)
+
+☐ Visit homepage
+☐ Try to login as admin
+☐ Check dashboard loads
+☐ Test registration (create test customer)
+☐ Test provider registration
+☐ Approve provider (as admin)
+☐ Create a service (as provider)
+☐ View service list
+☐ Make a test booking
+
+
+STEP 8: SET UP INITIAL DATA
+═══════════════════════════════════════════════════════════════
+☐ Login as admin
+☐ Go to Django admin: /admin/
+☐ Create categories:
+   □ Driver Booking
+   □ House Cleaning
+   □ Daycare
+   □ Office Cleaning
+   □ Personal Chef
+   □ Plumbing
+   □ Electrician
+   □ Tutoring
+   □ Elderly Care
+   □ Laundry
+   □ Gardening
+   □ Security
+
+
+TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════
+Build failed?
+☐ Check logs in Render dashboard
+☐ Verify build.sh exists and has correct commands
+☐ Check requirements.txt is committed
+
+Database connection error?
+☐ Verify DATABASE_URL is correct
+☐ Check database is in "Available" status
+☐ Ensure database and web service are in same region
+
+CSRF errors?
+☐ Verify CSRF_TRUSTED_ORIGINS has https:// prefix
+☐ Check URL matches your actual Render URL
+
+Static files not loading?
+☐ Check build logs for "Collecting static files" success
+☐ Verify STATIC_ROOT is set to 'staticfiles'
+
+Site is slow/unresponsive?
+☐ First request after sleep takes 30-60 seconds (normal for free tier)
+☐ Subsequent requests should be fast
+
+
+IMPORTANT NOTES
+═══════════════════════════════════════════════════════════════
+⚠️ Free tier sleeps after 15 minutes of inactivity
+⚠️ Uploaded media files don't persist (use Cloudinary for production)
+⚠️ Free database has no backups (backup manually if needed)
+
+
+FUTURE UPDATES
+═══════════════════════════════════════════════════════════════
+To update your site:
+☐ Make code changes locally
+☐ git add .
+☐ git commit -m "Your update message"
+☐ git push origin main
+☐ Render auto-deploys in 3-5 minutes
+
+
+═══════════════════════════════════════════════════════════════
+  DEPLOYMENT COMPLETE! 🎉
+═══════════════════════════════════════════════════════════════
+
+Your site: https://service-platform.onrender.com
+Login: admin@servicehub.com / admin123
+
+For detailed help, see:
+- RENDER_QUICK_START.md (quick reference)
+- DEPLOYMENT_GUIDE.md (complete guide)
+- DEPLOYMENT_SUMMARY.md (what was changed)
+
+═══════════════════════════════════════════════════════════════
