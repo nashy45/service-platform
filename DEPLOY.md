@@ -42,7 +42,7 @@ git push -u origin main
 3. Configure:
    - **Name**: `service-platform` (your URL will be: service-platform.onrender.com)
    - **Build Command**: `./build.sh`
-   - **Start Command**: `gunicorn service_platform.wsgi:application`
+   - **Start Command**: `gunicorn --bind 0.0.0.0:$PORT service_platform.wsgi:application`
    - **Instance Type**: **Free**
 
 ---
