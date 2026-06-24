@@ -2,7 +2,10 @@
 # exit on error
 set -o errexit
 
-# Install dependencies
+# Upgrade pip
+pip install --upgrade pip
+
+# Install Python dependencies
 pip install -r requirements.txt
 
 # Build Tailwind CSS
